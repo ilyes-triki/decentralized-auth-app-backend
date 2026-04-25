@@ -1,0 +1,173 @@
+############################################################
+# PROFESSIONAL .gitignore
+# Spring Boot + IntelliJ + MySQL + JWT + Production Ready
+############################################################
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+out/
+
+############################
+# VS Code (optional)
+############################
+.vscode/
+
+############################
+# Eclipse / STS (optional)
+############################
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache/
+
+############################
+# NetBeans (optional)
+############################
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+############################
+# Build output
+############################
+target/
+build/
+.gradle/
+
+############################
+# Logs
+############################
+logs/
+*.log
+*.out
+*.err
+hs_err_pid*
+
+############################
+# Temporary files
+############################
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+############################
+# OS generated files
+############################
+.DS_Store
+Thumbs.db
+desktop.ini
+
+############################
+# Java compiled files
+############################
+*.class
+*.jar
+*.war
+*.ear
+
+# Keep wrapper jar if using Maven Wrapper
+!/.mvn/wrapper/maven-wrapper.jar
+
+############################
+# Maven
+############################
+.mvn/timing.properties
+
+############################
+# Dependency caches
+############################
+.m2/
+node_modules/
+
+############################
+# Environment / Secrets
+############################
+.env
+.env.*
+!.env.example
+
+############################
+# Spring Boot config secrets
+############################
+application-local.properties
+application-dev.properties
+application-prod.properties
+application-secret.properties
+
+application-local.yml
+application-dev.yml
+application-prod.yml
+application-secret.yml
+
+############################
+# Uploaded files / storage
+############################
+uploads/
+storage/
+media/
+
+############################
+# Database dumps / backups
+############################
+*.sql
+*.dump
+*.bak
+*.backup
+
+############################
+# JWT / Security keys
+############################
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+keystore/
+keys/
+
+############################
+# Docker local overrides
+############################
+docker-compose.override.yml
+.env.docker
+
+############################
+# Test reports
+############################
+surefire-reports/
+failsafe-reports/
+jacoco.exec
+coverage/
+
+############################
+# Generated docs
+############################
+generated-docs/
+
+############################################################
+# IMPORTANT FILES TO KEEP
+############################################################
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.properties
+!pom.xml
+!README.md
+!src/**
+
+############################################################
+# RECOMMENDED PROJECT PRACTICE
+############################################################
+# Keep only:
+# application.properties (generic defaults)
+# application-example.properties
+# application.yml (non-secret defaults)
+############################################################
