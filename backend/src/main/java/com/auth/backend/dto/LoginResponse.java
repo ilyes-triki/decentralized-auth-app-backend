@@ -9,5 +9,6 @@ public class LoginResponse {
 
     private String address;
     private String role;
+    private String token;
 
 }
