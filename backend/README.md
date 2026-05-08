@@ -2,6 +2,9 @@
 
 Spring Boot service that powers **email-verified** wallet authentication: OTP lifecycle (dev-mock logging), ticket-bound nonce challenges, signature verification (via Web3j), JWT sessions, **IP risk scoring and blocklist** enforcement, role-aware REST endpoints, rate limiting, structured errors, and HTTP access auditing.
 
+Features: OTP + wallet login binding, trusted returning-wallet login, IP threat scoring/auto-block, admin moderation APIs.  
+API base URL examples: `/api/auth` for authentication and `/api/admin` for moderation/admin dashboards.
+
 ---
 
 ## Tech stack
@@ -33,6 +36,8 @@ Optional:
 From this directory (`backend/`):
 
 ```bash
+git clone <your-repo-url>
+cd decentralized-auth-backend/backend
 ./mvnw spring-boot:run
 ```
 
@@ -82,6 +87,14 @@ All keys can be supplied via environment variables or `application.properties`. 
 | `SPRING_DATASOURCE_*` | JDBC URL, user, password, driver (see `application.properties`). |
 
 Logging: HTTP audit lines use logger **`AUDIT_HTTP`** (see `logging.level.AUDIT_HTTP`). Email OTP codes in dev use **`EMAIL_OTP_DEV`**.
+
+### Minimum environment for cloned project
+
+- **Must set in staging/production:** `APP_AUTH_JWT_SECRET` (strong Base64 secret; never keep development default).
+- **Must align with frontend URL:** `APP_CORS_ALLOWED_ORIGINS` (for example `http://localhost:4200` in dev).
+- **Optional but recommended:** `APP_AUTH_ADMIN_WALLETS` for admin access control.
+- **Database choice:** use default H2 for local quick start, or set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` (+ `postgres` profile) for PostgreSQL.
+- **Dev-only OTP shortcut:** `APP_AUTH_DEV_FIXED_OTP` can be set locally for deterministic testing; keep empty in production.
 
 ---
 
