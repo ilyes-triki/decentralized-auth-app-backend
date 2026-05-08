@@ -35,7 +35,11 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String path = request.getRequestURI();
-        if (!"/api/auth/nonce".equals(path) && !"/api/auth/login".equals(path)) {
+        boolean rateLimited = "/api/auth/nonce".equals(path)
+                || "/api/auth/login".equals(path)
+                || "/api/auth/email/start".equals(path)
+                || "/api/auth/email/verify".equals(path);
+        if (!rateLimited) {
             filterChain.doFilter(request, response);
             return;
         }

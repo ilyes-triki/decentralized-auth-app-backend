@@ -127,4 +127,22 @@ class JwtSecurityIntegrationTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void adminIpEventsEndpointAllowsAdminToken() throws Exception {
+        String token = jwtService.generateToken("0xadmin", "admin");
+
+        mockMvc.perform(get("/api/admin/ip-events")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void adminIpBlocksEndpointAllowsAdminToken() throws Exception {
+        String token = jwtService.generateToken("0xadmin", "admin");
+
+        mockMvc.perform(get("/api/admin/ip-blocks")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk());
+    }
 }

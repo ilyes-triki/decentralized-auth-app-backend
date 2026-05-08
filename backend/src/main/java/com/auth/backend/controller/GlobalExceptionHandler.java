@@ -1,6 +1,7 @@
 package com.auth.backend.controller;
 
 import com.auth.backend.dto.ApiErrorResponse;
+import com.auth.backend.security.AccountBlockedException;
 import com.auth.backend.security.RateLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,16 @@ public class GlobalExceptionHandler {
                 "RATE_LIMIT"
         );
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
+    }
+
+    @ExceptionHandler(AccountBlockedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccountBlocked(AccountBlockedException ex) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                ex.getMessage(),
+                HttpStatus.FORBIDDEN.value(),
+                "ACCOUNT_BLOCKED"
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(RuntimeException.class)

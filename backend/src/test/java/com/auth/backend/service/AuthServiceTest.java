@@ -4,6 +4,7 @@ import com.auth.backend.model.UserAccount;
 import com.auth.backend.repository.AuthNonceRepository;
 import com.auth.backend.repository.LoginHistoryRepository;
 import com.auth.backend.repository.UserAccountRepository;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -18,10 +19,12 @@ class AuthServiceTest {
         AuthNonceRepository authNonceRepository = mock(AuthNonceRepository.class);
         UserAccountRepository userAccountRepository = mock(UserAccountRepository.class);
         LoginHistoryRepository loginHistoryRepository = mock(LoginHistoryRepository.class);
+        EmailAuthService emailAuthService = mock(EmailAuthService.class);
         return new AuthService(
                 authNonceRepository,
                 userAccountRepository,
                 loginHistoryRepository,
+                emailAuthService,
                 adminWallets,
                 300
         );
@@ -78,10 +81,12 @@ class AuthServiceTest {
         userAccount.setRole("admin");
         when(userAccountRepository.findById("0xstored")).thenReturn(Optional.of(userAccount));
 
+        EmailAuthService emailAuthService = mock(EmailAuthService.class);
         AuthService authService = new AuthService(
                 authNonceRepository,
                 userAccountRepository,
                 loginHistoryRepository,
+                emailAuthService,
                 "",
                 300
         );

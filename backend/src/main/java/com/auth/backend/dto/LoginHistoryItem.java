@@ -8,13 +8,26 @@ public class LoginHistoryItem {
     private final boolean successful;
     private final String failureReason;
     private final Instant createdAt;
+    private final String clientIp;
 
     public LoginHistoryItem(Long id, String address, boolean successful, String failureReason, Instant createdAt) {
+        this(id, address, successful, failureReason, createdAt, null);
+    }
+
+    public LoginHistoryItem(
+            Long id,
+            String address,
+            boolean successful,
+            String failureReason,
+            Instant createdAt,
+            String clientIp
+    ) {
         this.id = id;
         this.address = address;
         this.successful = successful;
         this.failureReason = failureReason;
         this.createdAt = createdAt;
+        this.clientIp = clientIp;
     }
 
     public Long getId() {
@@ -35,5 +48,9 @@ public class LoginHistoryItem {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getClientIp() {
+        return clientIp;
     }
 }

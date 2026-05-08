@@ -1,6 +1,6 @@
 # Decentralized Auth — Backend API
 
-Spring Boot service that powers wallet-based authentication: nonce challenges, signature verification (via Web3j), JWT sessions, role-aware REST endpoints, rate limiting, structured errors, and HTTP access auditing.
+Spring Boot service that powers **email-verified** wallet authentication: OTP lifecycle (dev-mock logging), ticket-bound nonce challenges, signature verification (via Web3j), JWT sessions, **IP risk scoring and blocklist** enforcement, role-aware REST endpoints, rate limiting, structured errors, and HTTP access auditing.
 
 ---
 
@@ -72,9 +72,16 @@ All keys can be supplied via environment variables or `application.properties`. 
 | `APP_CORS_ALLOWED_ORIGINS` | Allowed browser origins (default includes `http://localhost:4200`). |
 | `APP_SECURITY_RATE_LIMIT_MAX_REQUESTS` | Max requests per client per window for sensitive endpoints. |
 | `APP_SECURITY_RATE_LIMIT_WINDOW_SECONDS` | Rate-limit sliding window length. |
+| `APP_SECURITY_IP_TRUST_X_FORWARDED_FOR` | When `true`, first `X-Forwarded-For` hop is trusted for client IP (off by default to reduce spoofing). |
+| `APP_SECURITY_IP_AUTO_BLOCK_MINUTES` | Duration for **HIGH** risk and auth-failure auto-blocks (default 30). |
+| `APP_SECURITY_IP_AUTH_FAILURE_WINDOW_SECONDS` / `APP_SECURITY_IP_AUTH_FAILURE_THRESHOLD` | Sliding window + count of failed logins toward auto-block. |
+| `APP_AUTH_EMAIL_OTP_TTL_SECONDS` | OTP validity (default 600s). |
+| `APP_AUTH_EMAIL_TICKET_TTL_SECONDS` | Email ticket TTL for nonce/login binding (default 900s). |
+| `APP_AUTH_EMAIL_OTP_MAX_VERIFY_ATTEMPTS` | Max OTP verification attempts per issued code. |
+| `APP_AUTH_DEV_FIXED_OTP` | **Tests / local only:** if set, accept this OTP without persisting random codes (empty in production). |
 | `SPRING_DATASOURCE_*` | JDBC URL, user, password, driver (see `application.properties`). |
 
-Logging: HTTP audit lines use logger **`AUDIT_HTTP`** (see `logging.level.AUDIT_HTTP`).
+Logging: HTTP audit lines use logger **`AUDIT_HTTP`** (see `logging.level.AUDIT_HTTP`). Email OTP codes in dev use **`EMAIL_OTP_DEV`**.
 
 ---
 
@@ -82,21 +89,28 @@ Logging: HTTP audit lines use logger **`AUDIT_HTTP`** (see `logging.level.AUDIT_
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/api/auth/nonce` | Public | Issues a sign-in challenge for a wallet address. |
-| POST | `/api/auth/login` | Public | Verifies signature and returns JWT + role. |
-| GET | `/api/profile/me` | Bearer JWT | Returns the authenticated user profile from token claims. |
+| POST | `/api/auth/email/start` | Public | Start email verification; creates OTP (logged in dev via `EMAIL_OTP_DEV`). |
+| POST | `/api/auth/email/verify` | Public | Verifies OTP; returns short-lived **emailTicket** for nonce/login. |
+| GET | `/api/auth/email-status` | Public | Returns whether a wallet is already linked to a verified email (used by wallet-only returning login UX). |
+| GET | `/api/auth/nonce` | Public | Issues a sign-in challenge; accepts `emailTicket` for first-time email-linking flow, or no ticket for wallets already linked to a verified email. |
+| POST | `/api/auth/login` | Public | Verifies signature + nonce; `emailTicket` required for first-time linking and optional for trusted returning wallets already linked to verified email; records `client_ip` on login history. |
+| GET | `/api/profile/me` | Bearer JWT | Returns profile from token claims (address, email fields, `lastLoginIp` when known). |
 | GET | `/api/admin/health` | Bearer JWT (admin) | Simple admin health check. |
-| GET | `/api/admin/login-history` | Bearer JWT (admin) | Login history sample for analytics. |
+| GET | `/api/admin/login-history` | Bearer JWT (admin) | Login history sample for analytics (includes `clientIp`). |
 | GET | `/api/admin/stats` | Bearer JWT (admin) | Aggregated login statistics. |
 | GET | `/api/admin/access-log` | Bearer JWT (admin) | Recent HTTP access audit rows. |
+| GET | `/api/admin/ip-events` | Bearer JWT (admin) | Filterable IP risk events for review. |
+| GET | `/api/admin/ip-blocks` | Bearer JWT (admin) | Active IP blocklist entries (auto + manual). |
+| POST | `/api/admin/ip-blocks` | Bearer JWT (admin) | Manual block (optional permanent flag + reason). |
+| DELETE | `/api/admin/ip-blocks/{ip}` | Bearer JWT (admin) | Remove a block entry (unblock). |
 
-Errors use a structured JSON body (`message`, `status`, `timestamp`, `errorCode`, `requestId`) via `GlobalExceptionHandler`.
+Errors use a structured JSON body (`message`, `status`, `timestamp`, `errorCode`, `requestId`) via `GlobalExceptionHandler`. Blocked IPs respond with **`403`** and **`errorCode: IP_BLOCKED`** before controllers run.
 
 ---
 
 ## Database migrations
 
-Flyway scripts live under `src/main/resources/db/migration/`. Hibernate runs with **`ddl-auto=validate`** — schema changes must go through Flyway.
+Flyway scripts live under `src/main/resources/db/migration/`. Hibernate runs with **`ddl-auto=validate`** — schema changes must go through Flyway. Migration **`V4__email_ip_security.sql`** adds email OTP/ticket tables, IP risk/blocklist tables, and account email columns.
 
 ---
 
@@ -117,6 +131,8 @@ Integration tests cover JWT security and controller behaviour; ensure **JDK 21**
 3. Use **PostgreSQL** (or another managed DB) instead of H2 for durability and concurrency.
 4. Disable Flyway repair-on-start (`app.flyway.repair-before-migrate=false`) unless you maintain migrations deliberately (postgres profile already aligns with this).
 5. Keep admin wallet lists minimal and review **`APP_AUTH_ADMIN_WALLETS`** regularly.
+6. Leave **`APP_AUTH_DEV_FIXED_OTP`** empty in production; wire real email (SMTP/transactional provider) when replacing dev-mock OTP.
+7. Only enable **`APP_SECURITY_IP_TRUST_X_FORWARDED_FOR`** behind a trusted reverse proxy that sanitizes client headers.
 
 ---
 

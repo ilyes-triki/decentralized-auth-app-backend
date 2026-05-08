@@ -16,17 +16,26 @@ public class SecurityConfig {
     private final AuthRateLimitFilter authRateLimitFilter;
     private final RequestIdFilter requestIdFilter;
     private final ApiAccessLogFilter apiAccessLogFilter;
+    private final IpBlocklistFilter ipBlocklistFilter;
+    private final IpRiskAnalysisFilter ipRiskAnalysisFilter;
+    private final AccountStatusFilter accountStatusFilter;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
             AuthRateLimitFilter authRateLimitFilter,
             RequestIdFilter requestIdFilter,
-            ApiAccessLogFilter apiAccessLogFilter
+            ApiAccessLogFilter apiAccessLogFilter,
+            IpBlocklistFilter ipBlocklistFilter,
+            IpRiskAnalysisFilter ipRiskAnalysisFilter,
+            AccountStatusFilter accountStatusFilter
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authRateLimitFilter = authRateLimitFilter;
         this.requestIdFilter = requestIdFilter;
         this.apiAccessLogFilter = apiAccessLogFilter;
+        this.ipBlocklistFilter = ipBlocklistFilter;
+        this.ipRiskAnalysisFilter = ipRiskAnalysisFilter;
+        this.accountStatusFilter = accountStatusFilter;
     }
 
     @Bean
@@ -41,8 +50,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(authRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(ipBlocklistFilter, RequestIdFilter.class)
+                .addFilterAfter(ipRiskAnalysisFilter, IpBlocklistFilter.class)
+                .addFilterAfter(authRateLimitFilter, IpRiskAnalysisFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(accountStatusFilter, JwtAuthenticationFilter.class)
                 .addFilterAfter(apiAccessLogFilter, JwtAuthenticationFilter.class);
 
         return http.build();

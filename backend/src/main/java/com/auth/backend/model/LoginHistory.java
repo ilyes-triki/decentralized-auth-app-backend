@@ -30,6 +30,9 @@ public class LoginHistory {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Column(name = "client_ip", length = 64)
+    private String clientIp;
+
     @PrePersist
     public void onCreate() {
         createdAt = Instant.now();
@@ -65,5 +68,13 @@ public class LoginHistory {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
     }
 }

@@ -21,6 +21,9 @@ public class AuthNonce {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "email_ticket", length = 64)
+    private String emailTicket;
+
     public String getAddress() {
         return address;
     }
@@ -43,5 +46,13 @@ public class AuthNonce {
 
     public void setExpiresAt(Instant expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public String getEmailTicket() {
+        return emailTicket;
+    }
+
+    public void setEmailTicket(String emailTicket) {
+        this.emailTicket = emailTicket;
     }
 }
