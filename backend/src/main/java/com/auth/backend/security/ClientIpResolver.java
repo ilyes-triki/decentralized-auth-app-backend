@@ -12,11 +12,16 @@ public final class ClientIpResolver {
             if (xff != null && !xff.isBlank()) {
                 String first = xff.split(",")[0].trim();
                 if (!first.isEmpty()) {
-                    return first;
+                    String normalized = IpAddressNormalizer.normalize(first);
+                    return normalized != null ? normalized : first;
                 }
             }
         }
         String remote = request.getRemoteAddr();
-        return remote != null ? remote : "unknown";
+        if (remote == null || remote.isBlank()) {
+            return "unknown";
+        }
+        String normalized = IpAddressNormalizer.normalize(remote);
+        return normalized != null ? normalized : remote;
     }
 }

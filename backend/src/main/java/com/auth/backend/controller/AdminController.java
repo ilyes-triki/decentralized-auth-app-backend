@@ -20,6 +20,7 @@ import com.auth.backend.repository.LoginHistoryRepository;
 import com.auth.backend.service.AccountAppealService;
 import com.auth.backend.service.AccountStatusService;
 import com.auth.backend.service.IpBlocklistService;
+import com.auth.backend.security.IpAddressNormalizer;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -147,7 +148,8 @@ public class AdminController {
                 : "Blocked by administrator";
         Instant until = body.isPermanent() ? null : Instant.now().plus(30, ChronoUnit.DAYS);
         ipBlocklistService.adminBlock(ip, reason, until, authentication != null ? authentication.getName() : null);
-        return Map.of("status", "blocked", "ip", ip);
+        String storedIp = IpAddressNormalizer.normalize(ip);
+        return Map.of("status", "blocked", "ip", storedIp != null ? storedIp : ip);
     }
 
     @DeleteMapping("/ip-blocks/{ip}")
